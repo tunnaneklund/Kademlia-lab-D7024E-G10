@@ -19,13 +19,6 @@ func NewRoutingTable(me Contact) *RoutingTable {
 	return routingTable
 }
 
-// AddContacts add a new contact to the correct Bucket
-func (routingTable *RoutingTable) AddContacts(contacts []Contact) {
-	for _, c := range contacts {
-		routingTable.AddContact(c)
-	}
-}
-
 // AddContact add a new contact to the correct Bucket
 func (routingTable *RoutingTable) AddContact(contact Contact) {
 	bucketIndex := routingTable.getBucketIndex(contact.ID)

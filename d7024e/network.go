@@ -38,7 +38,7 @@ type responseMessage struct {
 // NewNetwork constructor
 func NewNetwork(ip string) Network {
 	n := Network{}
-	n.cc = make(chan []Contact, ALPHA)
+	n.cc = make(chan []Contact, ALPHA*2)
 	n.rt = NewRoutingTable(NewContact(NewRandomKademliaID(), ip))
 	return n
 }
@@ -194,7 +194,7 @@ func (network *Network) storeLocalData(data []byte) { // needs fix NewKademliaID
 }
 
 func (network *Network) findClosestLocalContacts(target Contact) []Contact {
-	return network.rt.FindClosestContacts(target.ID, ALPHA)
+	return network.rt.FindClosestContacts(target.ID, K)
 }
 
 type shortlistStatus struct {
@@ -255,8 +255,9 @@ func (network *Network) ContactLookup(target Contact) []Contact {
 					temp.responded = true
 					m[cl[0].ID] = temp
 
-					cl = cl[1:]
+					network.rt.AddContact(cl[0])
 
+					// removes contacts aleady in shortlist
 					for i := len(cl) - 1; i >= 0; i-- {
 						if m[cl[i].ID].inList {
 							cl = append(cl[:i], cl[i+1:]...)
@@ -289,7 +290,6 @@ func (network *Network) ContactLookup(target Contact) []Contact {
 // sets up information on each contact
 func updateContacts(cl *[]Contact, target Contact, m *map[*KademliaID]shortlistStatus) {
 	for _, c := range *cl {
-		c.CalcDistance(target.ID)
 		(*m)[c.ID] = newStatus()
 	}
 }
