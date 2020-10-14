@@ -17,8 +17,7 @@ func main() {
 
 	if len(os.Args) > 2 {
 		address := "localhost:" + os.Args[2]
-		c := d7024e.NewContact(d7024e.NewRandomKademliaID(), address)
-		fmt.Println(network.SendPingMessage(&c))
+		network.JoinNetwork(address)
 
 	}
 

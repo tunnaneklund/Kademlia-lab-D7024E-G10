@@ -2,6 +2,7 @@ package d7024e
 
 import (
 	"encoding/hex"
+	"hash/fnv"
 	"math/rand"
 )
 
@@ -25,12 +26,19 @@ func NewKademliaID(data string) *KademliaID {
 
 // NewRandomKademliaID returns a new instance of a random KademliaID,
 // change this to a better version if you like
-func NewRandomKademliaID() *KademliaID {
+func NewRandomKademliaID(address string) *KademliaID {
 	newKademliaID := KademliaID{}
+	rand.Seed(hash(address))
 	for i := 0; i < IDLength; i++ {
 		newKademliaID[i] = uint8(rand.Intn(256))
 	}
 	return &newKademliaID
+}
+
+func hash(s string) int64 {
+	h := fnv.New64a()
+	h.Write([]byte(s))
+	return int64(h.Sum64())
 }
 
 // Less returns true if kademliaID < otherKademliaID (bitwise)

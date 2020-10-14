@@ -39,7 +39,7 @@ type responseMessage struct {
 func NewNetwork(ip string) Network {
 	n := Network{}
 	n.cc = make(chan []Contact, ALPHA*2)
-	n.rt = NewRoutingTable(NewContact(NewRandomKademliaID(), ip))
+	n.rt = NewRoutingTable(NewContact(NewRandomKademliaID(ip), ip))
 	return n
 }
 
@@ -97,6 +97,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Status = "ok"
 		res.Contacts = contacts
 		enc.Encode(res)
+		network.rt.AddContact(req.Sender)
+		network.PrintClosestContacts()
 
 	case "finddata":
 
@@ -124,9 +126,10 @@ func (network *Network) handleConnection(conn net.Conn) {
 }
 
 func (network Network) SendPingMessageIP(address string) string {
-	id := NewRandomKademliaID()
+	id := NewRandomKademliaID("dummy id")
 	c := NewContact(id, address)
 	return network.SendPingMessage(&c)
+
 }
 
 // SendPingMessage returns the contact that was pinged, can be used to obtain full contact from just ip
@@ -223,7 +226,7 @@ func newStatus() shortlistStatus {
 // ContactLookup return a list of the K closest contacts to ID of target
 func (network *Network) ContactLookup(target KademliaID) []Contact {
 	// used to keep track of contacts
-	m := make(map[*KademliaID]shortlistStatus)
+	m := make(map[KademliaID]shortlistStatus)
 	// using ContactCandidate to get access to sorting
 	shortlist := ContactCandidates{}
 	shortlist.Append(network.findClosestLocalContacts(target))
@@ -240,16 +243,16 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 				break
 			}
 
-			stat := m[c.ID]
+			stat := m[*c.ID]
 			if stat.queried {
 				if !stat.responded {
-					m[c.ID] = shortlistStatus{}
+					m[*c.ID] = shortlistStatus{}
 					shortlist.Delete(i)
 				}
 			} else {
 				counter--
 				stat.queried = true
-				m[c.ID] = stat
+				m[*c.ID] = stat
 				go network.SendFindContactMessage(c, target)
 			}
 		}
@@ -260,15 +263,13 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 			select {
 			case cl := <-network.cc:
 				{
-					temp := m[cl[0].ID]
+					temp := m[*cl[0].ID]
 					temp.responded = true
-					m[cl[0].ID] = temp
-
+					m[*cl[0].ID] = temp
 					network.rt.AddContact(cl[0])
-
 					// removes contacts aleady in shortlist
 					for i := len(cl) - 1; i >= 0; i-- {
-						if m[cl[i].ID].inList {
+						if m[*cl[i].ID].inList || (*cl[i].ID).Equals(network.rt.me.ID) {
 							cl = append(cl[:i], cl[i+1:]...)
 						}
 					}
@@ -285,21 +286,29 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 		shortlist.Sort()
 
 		if shortlist.contacts[0] == closestNode && exitOnNext {
+			if shortlist.Len() < K {
+				return shortlist.GetContacts(shortlist.Len())
+			}
 			return shortlist.GetContacts(K)
 		} else if shortlist.contacts[0] == closestNode {
 			exitOnNext = true
 		} else {
 			exitOnNext = false
+			closestNode = shortlist.contacts[0]
 		}
-
 	}
 
 }
 
+// PrintClosestContacts prints contacts
+func (network *Network) PrintClosestContacts() {
+	fmt.Println(network.findClosestLocalContacts(*network.rt.me.ID))
+}
+
 // sets up information on each contact
-func updateContacts(cl *[]Contact, m *map[*KademliaID]shortlistStatus) {
+func updateContacts(cl *[]Contact, m *map[KademliaID]shortlistStatus) {
 	for _, c := range *cl {
-		(*m)[c.ID] = newStatus()
+		(*m)[*c.ID] = newStatus()
 	}
 }
 
@@ -310,4 +319,6 @@ func (network *Network) JoinNetwork(contactAddress string) {
 
 	// perform node lookup on itself
 	network.ContactLookup(*network.rt.me.ID)
+
+	network.PrintClosestContacts()
 }
