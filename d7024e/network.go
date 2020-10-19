@@ -13,7 +13,7 @@ const K = 10
 // network
 type Network struct {
 	rt        *RoutingTable
-	dataStore map[string][]byte
+	dataStore map[string]string
 	cc        chan []Contact
 }
 
@@ -87,7 +87,9 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Type = "ping"
 		res.Status = "ok"
 
-		enc.Encode(res)
+		conn.
+			enc.Encode(res)
+		network.rt.AddContact(req.Sender)
 
 	case "findcontact":
 
@@ -105,8 +107,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 		data := network.getLocalData(req.Hash)
 
 		res.Type = "finddata"
-		if data != nil {
-			res.Data = string(data)
+		if data != "" {
+			res.Data = data
 			res.Status = "ok"
 		} else {
 			res.Status = "fail"
@@ -116,7 +118,7 @@ func (network *Network) handleConnection(conn net.Conn) {
 
 	case "storedata":
 
-		network.storeLocalData([]byte(req.Data))
+		network.storeLocalData(string(req.Data))
 
 		res.Type = "storedata"
 		res.Status = "ok"
@@ -188,21 +190,71 @@ func (network Network) SendFindContactMessage(contact Contact, target KademliaID
 
 }
 
-func (network *Network) SendFindDataMessage(hash string) {
-	// Find closest n contacts, then request data
+func (network *Network) SendFindDataMessage(hash string, contact Contact) string {
+	req := requestMessage{}
+	req.Sender = network.rt.me
+	req.Type = "finddata"
+	req.Hash = hash
+
+	conn, err := net.Dial("tcp", contact.Address)
+	if err != nil {
+		return ""
+	}
+
+	defer conn.Close()
+
+	dec := json.NewDecoder(conn)
+	enc := json.NewEncoder(conn)
+
+	enc.Encode(req)
+
+	res := responseMessage{}
+
+	dec.Decode(&res)
+
+	return res.Data
 
 }
 
-func (network *Network) SendStoreMessage(data []byte) {
-	// Find clostest n contacts, then request to store data
+func (network *Network) SendStoreMessage(data string, contact Contact) {
+	req := requestMessage{}
+	req.Sender = network.rt.me
+	req.Type = "storedata"
+	req.Data = data
+
+	conn, err := net.Dial("tcp", contact.Address)
+	if err != nil {
+		return
+	}
+
+	defer conn.Close()
+
+	dec := json.NewDecoder(conn)
+	enc := json.NewEncoder(conn)
+
+	enc.Encode(req)
+
+	res := responseMessage{}
+
+	dec.Decode(&res)
+
 }
 
-func (network *Network) getLocalData(hash string) []byte {
+func (network *Network) getLocalData(hash string) string {
 	return network.dataStore[hash]
 }
 
-func (network *Network) storeLocalData(data []byte) { // needs fix NewKademliaID not working as intended
-	network.dataStore[NewKademliaID(string(data)).String()] = data
+func (network *Network) storeLocalData(data string) { // needs fix NewKademliaID not working as intended
+	network.dataStore[NewRandomKademliaID(data).String()] = data
+}
+
+func (network *Network) storeData(data string) {
+	id := NewRandomKademliaID(data)
+	contacts := network.ContactLookup(*id)
+	for _, c := range contacts {
+		go network.SendStoreMessage(data, c)
+	}
+	network.storeLocalData(data)
 }
 
 func (network *Network) findClosestLocalContacts(target KademliaID) []Contact {
