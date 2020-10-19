@@ -10,14 +10,26 @@ func main() {
 
 	// used for testing pings
 
-	port := ":" + os.Args[1]
+	// without docker
+	//port := os.Args[1]
+	//ip := "localhost"
 
-	fmt.Println(port)
-	network := d7024e.NewNetwork("localhost" + port)
+	// with docker
+	port := ":8080"
+	ip := string(os.Args[1])
+
+	address := ip + port
+	fmt.Println(address)
+
+	network := d7024e.NewNetwork(address)
 
 	if len(os.Args) > 2 {
-		address := "localhost:" + os.Args[2]
-		network.JoinNetwork(address)
+		// without docker
+		//otherAddress := localhost + os.Args[2]
+
+		// with docker
+		otherAddress := os.Args[2] + port
+		network.JoinNetwork(otherAddress)
 
 	}
 
