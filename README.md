@@ -18,3 +18,7 @@ to start: powershell -ExecutionPolicy ByPass -File dockerrun.ps1
 to close: powershell -ExecutionPolicy ByPass -File dockerclose.ps1
 
 read dockerrun.ps1 to see how a single node is started. -d flag is not needed then.
+
+build: docker build --tag NAME .
+
+run all commands in top level folder of this project
