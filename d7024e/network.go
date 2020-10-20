@@ -87,8 +87,7 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Type = "ping"
 		res.Status = "ok"
 
-		conn.
-			enc.Encode(res)
+		enc.Encode(res)
 		network.rt.AddContact(req.Sender)
 
 	case "findcontact":
