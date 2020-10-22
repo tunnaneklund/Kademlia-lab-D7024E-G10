@@ -277,6 +277,9 @@ func (network *Network) storeData(data string) string {
 	for _, c := range contacts {
 		go network.SendStoreMessage(data, c)
 	}
+	if len(contacts) <= 0 {
+		network.storeLocalData(data)
+	}
 	return id.String()
 }
 
