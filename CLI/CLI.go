@@ -29,13 +29,13 @@ func main() {
 			},
 		},
 		{
-			Name:  "test",
-			Usage: "test tcp",
+			Name:  "exit",
+			Usage: "close node",
 			// Action är vad som händer när vi kör name kommandot
 			Action: func(c *cli.Context) error {
 				// print för att testa
 				req := d7024e.RequestMessage{}
-				req.Type = "clitest"
+				req.Type = "exit"
 				res, _ := sendTCPRequest(req, "localhost:8080")
 				fmt.Println(res.Status)
 				return nil

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"time"
 )
 
@@ -84,11 +85,23 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec.Decode(&req)
 
 	switch req.Type {
-	case "clitest":
-		res.Type = "ping"
+	case "exit":
+		res.Type = "exit"
 		res.Status = "ok"
 
 		enc.Encode(res)
+
+		os.Exit(0)
+	case "put":
+		data := req.Data
+		id := network.storeData(data)
+
+		res.Type = "put"
+		res.Status = "ok"
+		res.Data = id
+
+		enc.Encode(res)
+
 	case "ping":
 
 		res.Type = "ping"
@@ -246,12 +259,13 @@ func (network *Network) storeLocalData(data string) { // needs fix NewKademliaID
 	network.dataStore[NewRandomKademliaID(data).String()] = data
 }
 
-func (network *Network) storeData(data string) {
+func (network *Network) storeData(data string) string {
 	id := NewRandomKademliaID(data)
 	contacts := network.ContactLookup(*id)
 	for _, c := range contacts {
 		go network.SendStoreMessage(data, c)
 	}
+	return id.String()
 }
 
 // first find closest K nodes to hash
@@ -268,6 +282,7 @@ func (network *Network) getData(hash string) string {
 	}
 	data := <- res
 	return data
+	
 }
 
 func (network *Network) findClosestLocalContacts(target KademliaID) []Contact {
