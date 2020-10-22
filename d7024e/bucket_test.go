@@ -3,6 +3,7 @@ package d7024e
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestAddContact(t *testing.T) {
@@ -33,4 +34,16 @@ func TestLen(t *testing.T) {
 	if expected != output {
 		t.Errorf("expected %v but got %v with input %v", expected, output, input)
 	}
+}
+
+func TestString(t *testing.T) {
+	bucket := newBucket()
+
+	a := NewContact(NewKademliaID("FFFFFFFF00000000000000000000000000000000"), "localhost:8001")
+	b := NewContact(NewKademliaID("AAAAAAAA00000000000000000000000000000000"), "localhost:8001")
+
+	bucket.AddContact(b)
+	bucket.AddContact(a)
+
+	fmt.Println(bucket.String())
 }

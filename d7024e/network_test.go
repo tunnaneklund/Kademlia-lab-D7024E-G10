@@ -175,9 +175,16 @@ func TestUpdateContacts(t *testing.T) {
 	expected := shortlistStatus{false, false, true}
 	output := idmap[*c1.ID]
 
-
 	if output != expected {
 		t.Errorf("expected output to be %v but was %v", expected, output)
 	}
+}
 
+func TestGetDataStoreString(t *testing.T) {
+	network := NewNetwork("tmp")
+	network.storeLocalData("data1")
+	network.storeLocalData("data2") 
+	network.storeLocalData("data3")
+
+	fmt.Println(network.getDataStoreString())
 }
