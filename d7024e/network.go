@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"time"
 )
 
@@ -84,11 +85,14 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec.Decode(&req)
 
 	switch req.Type {
-	case "clitest":
-		res.Type = "ping"
+	case "exit":
+		res.Type = "exit"
 		res.Status = "ok"
 
 		enc.Encode(res)
+
+		os.Exit(0)
+
 	case "ping":
 
 		res.Type = "ping"
