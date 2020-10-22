@@ -85,6 +85,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec.Decode(&req)
 
 	switch req.Type {
+	
+	// for CLI
 	case "exit":
 		res.Type = "exit"
 		res.Status = "ok"
@@ -92,6 +94,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 		enc.Encode(res)
 
 		os.Exit(0)
+
+	// for CLI
 	case "put":
 		data := req.Data
 		id := network.storeData(data)
@@ -144,7 +148,7 @@ func (network *Network) handleConnection(conn net.Conn) {
 
 		enc.Encode(res)
 	
-
+	// for CLI
 	case "get":
 
 		data := network.getData(string(req.Data))
@@ -152,6 +156,23 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Type = "get"
 		res.Status = "ok"
 		res.Data = data
+
+
+		enc.Encode(res)
+	
+	// for CLI
+	case "printds":
+		res.Type = "printds"
+		res.Status = "ok"
+		res.Data = network.getDataStoreString()
+
+		enc.Encode(res)
+
+	// for CLI
+	case "printrt":
+		res.Type = "printrt"
+		res.Status = "ok"
+		res.Data = network.rt.String()
 
 
 		enc.Encode(res)

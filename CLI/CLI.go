@@ -69,6 +69,32 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "printrt",
+			Usage: "print routing table",
+			// Action är vad som händer när vi kör name kommandot
+			Action: func(c *cli.Context) error {
+				// print för att testa
+				req := d7024e.RequestMessage{}
+				req.Type = "printrt"
+				res, _ := sendTCPRequest(req, "localhost:8080")
+				fmt.Printf("status: %v\ndata: %v", res.Status, res.Data)
+				return nil
+			},
+		},
+		{
+			Name:  "printds",
+			Usage: "print data store",
+			// Action är vad som händer när vi kör name kommandot
+			Action: func(c *cli.Context) error {
+				// print för att testa
+				req := d7024e.RequestMessage{}
+				req.Type = "printds"
+				res, _ := sendTCPRequest(req, "localhost:8080")
+				fmt.Printf("status: %v\ndata: %v", res.Status, res.Data)
+				return nil
+			},
+		},
 	}
 
 	// startar app
