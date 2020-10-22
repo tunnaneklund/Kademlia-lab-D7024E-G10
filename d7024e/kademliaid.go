@@ -24,6 +24,16 @@ func NewKademliaID(data string) *KademliaID {
 	return &newKademliaID
 }
 
+func NewKademliaIDFromHash(hash string) *KademliaID {
+
+	newKademliaID := KademliaID{}
+	for i := 0; i < IDLength; i++ {
+		newKademliaID[i] = hash[i]
+	}
+
+	return &newKademliaID
+}
+
 // NewRandomKademliaID returns a new instance of a random KademliaID,
 // change this to a better version if you like
 func NewRandomKademliaID(address string) *KademliaID {

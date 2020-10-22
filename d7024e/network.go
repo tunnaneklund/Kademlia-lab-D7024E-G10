@@ -222,15 +222,15 @@ func (network *Network) createFindDataMessage(hash string) RequestMessage {
 	return req
 }
 
-func (network *Network) SendFindDataMessage(hash string, contact Contact) string {
+func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan string)  {
 	req := network.createFindDataMessage(hash)
 
 	res, err := sendTCPRequest(req, &contact)
 	if err != nil {
-		return ""
+		return 
 	}
 
-	return res.Data
+	c <- res.Data
 }
 
 func (network *Network) createSendStoreMessage(data string) RequestMessage {
@@ -269,6 +269,23 @@ func (network *Network) storeData(data string) string {
 		network.storeLocalData(data)
 	}
 	return id.String()
+}
+
+// first find closest K nodes to hash
+// then probes and ask for data
+// returns when it gets data from one of the contacts
+// TODO: HANDLE IF NOONE HAS
+func (network *Network) getData(hash string) string {
+	id := NewKademliaIDFromHash(hash)
+	contacts := network.ContactLookup(*id)
+
+	res := make(chan string)
+	for _, c := range contacts {
+		go network.SendFindDataMessage(hash, c, res)
+	}
+	data := <- res
+	return data
+	
 }
 
 func (network *Network) findClosestLocalContacts(target KademliaID) []Contact {
@@ -363,7 +380,6 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 			closestNode = shortlist.contacts[0]
 		}
 	}
-
 }
 
 // ta bort? få högre coverage
