@@ -1,5 +1,8 @@
 package d7024e
 
+import "fmt"
+import "strings"
+
 const bucketSize = 20
 
 // RoutingTable definition
@@ -66,4 +69,15 @@ func (routingTable *RoutingTable) getBucketIndex(id *KademliaID) int {
 	}
 
 	return IDLength*8 - 1
+}
+
+
+func (routingTable *RoutingTable) String() string {
+	var str strings.Builder
+	for i, v := range routingTable.buckets {
+		if v.Len() > 0 {
+			str.WriteString(fmt.Sprintf("bucket %v: %v\n", i, v.String()))
+		}
+	}
+	return str.String()
 }
