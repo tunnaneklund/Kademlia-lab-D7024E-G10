@@ -355,6 +355,13 @@ func (network *Network) PrintClosestContacts() {
 	fmt.Println(network.findClosestLocalContacts(*network.rt.me.ID))
 }
 
+// get string to neatly represent datastore
+func (network *Network) getDataStoreString() string {
+	b, _ := json.MarshalIndent(network.dataStore, "", "  ")
+	
+	return string(b)
+}
+
 // sets up information on each contact
 func updateContacts(cl *[]Contact, m *map[KademliaID]shortlistStatus) {
 	for _, c := range *cl {
