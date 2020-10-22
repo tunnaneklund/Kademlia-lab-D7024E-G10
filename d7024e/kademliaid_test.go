@@ -78,3 +78,8 @@ func TestCalcDistance(t *testing.T) {
 	}
 }
 
+func TestNewKademliaIDFromHash(t *testing.T) {
+	kid := NewKademliaIDFromHash("11112222333344445555")
+	fmt.Println(kid.String())
+}
+
