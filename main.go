@@ -11,12 +11,12 @@ func main() {
 	// used for testing pings
 
 	// without docker
-	port := os.Args[1]
-	ip := "localhost"
+	//port := os.Args[1]
+	//ip := "localhost"
 
 	// with docker
-	//port := ":8080"
-	//ip := string(os.Args[1])
+	port := ":8080"
+	ip := string(os.Args[1])
 
 	address := ip + port
 	fmt.Println(address)
@@ -25,10 +25,11 @@ func main() {
 
 	if len(os.Args) > 2 {
 		// without docker
-		otherAddress := "localhost" + os.Args[2]
+		//otherAddress := "localhost" + os.Args[2]
 
 		// with docker
-		//otherAddress := os.Args[2] + port
+		otherAddress := os.Args[2] + port
+
 		network.JoinNetwork(otherAddress)
 
 	}

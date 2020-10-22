@@ -85,7 +85,7 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec.Decode(&req)
 
 	switch req.Type {
-	
+
 	// for CLI
 	case "exit":
 		res.Type = "exit"
@@ -147,7 +147,7 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Status = "ok"
 
 		enc.Encode(res)
-	
+
 	// for CLI
 	case "get":
 
@@ -157,9 +157,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Status = "ok"
 		res.Data = data
 
-
 		enc.Encode(res)
-	
+
 	// for CLI
 	case "printds":
 		res.Type = "printds"
@@ -173,7 +172,6 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Type = "printrt"
 		res.Status = "ok"
 		res.Data = network.rt.String()
-
 
 		enc.Encode(res)
 	}
@@ -255,12 +253,12 @@ func (network *Network) createFindDataMessage(hash string) RequestMessage {
 	return req
 }
 
-func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan string)  {
+func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan string) {
 	req := network.createFindDataMessage(hash)
 
 	res, err := sendTCPRequest(req, &contact)
-	if err != nil || res.Status == "fail"{
-		return 
+	if err != nil || res.Status == "fail" {
+		return
 	}
 
 	c <- res.Data
@@ -316,9 +314,9 @@ func (network *Network) getData(hash string) string {
 	for _, c := range contacts {
 		go network.SendFindDataMessage(hash, c, res)
 	}
-	data := <- res
+	data := <-res
 	return data
-	
+
 }
 
 func (network *Network) findClosestLocalContacts(target KademliaID) []Contact {
@@ -353,8 +351,8 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 
 		// removes unresponsive contacts and sends rpc find to ALPHA nr of contacts
 		counter := ALPHA
-		for i, c := range shortlist.contacts {
-
+		for i := 0; i < len(shortlist.contacts); i++ {
+			c := shortlist.contacts[i]
 			if counter < 1 {
 				break
 			}
@@ -364,6 +362,7 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 				if !stat.responded {
 					m[*c.ID] = shortlistStatus{}
 					shortlist.Delete(i)
+					i--
 				}
 			} else {
 				counter--
