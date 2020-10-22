@@ -92,6 +92,15 @@ func (network *Network) handleConnection(conn net.Conn) {
 		enc.Encode(res)
 
 		os.Exit(0)
+	case "put":
+		data := req.Data
+		id := network.storeData(data)
+
+		res.Type = "put"
+		res.Status = "ok"
+		res.Data = id
+
+		enc.Encode(res)
 
 	case "ping":
 
@@ -250,13 +259,13 @@ func (network *Network) storeLocalData(data string) { // needs fix NewKademliaID
 	network.dataStore[NewRandomKademliaID(data).String()] = data
 }
 
-func (network *Network) storeData(data string) {
+func (network *Network) storeData(data string) string {
 	id := NewRandomKademliaID(data)
 	contacts := network.ContactLookup(*id)
 	for _, c := range contacts {
 		go network.SendStoreMessage(data, c)
 	}
-	network.storeLocalData(data)
+	return id.String()
 }
 
 func (network *Network) findClosestLocalContacts(target KademliaID) []Contact {
