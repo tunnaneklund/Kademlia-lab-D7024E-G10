@@ -84,6 +84,11 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec.Decode(&req)
 
 	switch req.Type {
+	case "clitest":
+		res.Type = "ping"
+		res.Status = "ok"
+
+		enc.Encode(res)
 	case "ping":
 
 		res.Type = "ping"
@@ -354,7 +359,7 @@ func (network *Network) PrintClosestContacts() {
 // get string to neatly represent datastore
 func (network *Network) getDataStoreString() string {
 	b, _ := json.MarshalIndent(network.dataStore, "", "  ")
-	
+
 	return string(b)
 }
 

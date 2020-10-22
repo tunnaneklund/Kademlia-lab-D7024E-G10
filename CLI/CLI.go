@@ -1,8 +1,11 @@
 package main
 
 import (
+	"d7024e"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"os"
 
 	"github.com/urfave/cli"
@@ -25,6 +28,19 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "test",
+			Usage: "test tcp",
+			// Action är vad som händer när vi kör name kommandot
+			Action: func(c *cli.Context) error {
+				// print för att testa
+				req := d7024e.RequestMessage{}
+				req.Type = "clitest"
+				res, _ := sendTCPRequest(req, "localhost:8080")
+				fmt.Println(res.Status)
+				return nil
+			},
+		},
 	}
 
 	// startar app
@@ -32,4 +48,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func sendTCPRequest(req d7024e.RequestMessage, address string) (res d7024e.ResponseMessage, err error) {
+	conn, err := net.Dial("tcp", address)
+	if err != nil {
+		return d7024e.ResponseMessage{}, err
+	}
+
+	defer conn.Close()
+
+	dec := json.NewDecoder(conn)
+	enc := json.NewEncoder(conn)
+
+	enc.Encode(req)
+
+	dec.Decode(&res)
+	return
 }
