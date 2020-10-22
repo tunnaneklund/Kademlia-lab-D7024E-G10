@@ -22,3 +22,7 @@ read dockerrun.ps1 to see how a single node is started. -d flag is not needed th
 build: docker build --tag NAME .
 
 run all commands in top level folder of this project
+
+
+## CLI
+To run cli run: go get github.com/urfave/cli

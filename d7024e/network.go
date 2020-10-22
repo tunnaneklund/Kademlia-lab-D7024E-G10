@@ -19,7 +19,7 @@ type Network struct {
 
 // *.Type == "ping" | "findcontact" | "finddata" | "storedata"
 
-type requestMessage struct {
+type RequestMessage struct {
 	Type   string
 	Sender Contact
 	Target KademliaID // findcontact
@@ -27,7 +27,7 @@ type requestMessage struct {
 	Data   string     // storedata
 }
 
-type responseMessage struct {
+type ResponseMessage struct {
 	Type     string
 	Sender   Contact
 	Status   string    // "ok" | "fail"
@@ -44,7 +44,7 @@ func NewNetwork(ip string) Network {
 	return n
 }
 
-func (network *Network) Listen(port string) error{
+func (network *Network) Listen(port string) error {
 
 	// Port only as argument for local testing
 	// Ping: respond
@@ -69,8 +69,6 @@ func (network *Network) Listen(port string) error{
 	}
 }
 
-
-
 func (network *Network) handleConnection(conn net.Conn) {
 
 	defer conn.Close()
@@ -78,9 +76,9 @@ func (network *Network) handleConnection(conn net.Conn) {
 	dec := json.NewDecoder(conn)
 	enc := json.NewEncoder(conn)
 
-	req := requestMessage{}
+	req := RequestMessage{}
 
-	res := responseMessage{}
+	res := ResponseMessage{}
 	res.Sender = network.rt.me
 
 	dec.Decode(&req)
@@ -137,10 +135,10 @@ func (network Network) SendPingMessageIP(address string) string {
 
 }
 
-func sendTCPRequest(req requestMessage, contact *Contact) (res responseMessage, err error) {
+func sendTCPRequest(req RequestMessage, contact *Contact) (res ResponseMessage, err error) {
 	conn, err := net.Dial("tcp", contact.Address)
 	if err != nil {
-		return responseMessage{}, err
+		return ResponseMessage{}, err
 	}
 
 	defer conn.Close()
@@ -154,13 +152,13 @@ func sendTCPRequest(req requestMessage, contact *Contact) (res responseMessage, 
 	return
 }
 
-func (network Network) createPingMessage() requestMessage {
-	req := requestMessage{}
+func (network Network) createPingMessage() RequestMessage {
+	req := RequestMessage{}
 	req.Sender = network.rt.me
 	req.Type = "ping"
 
 	return req
-} 
+}
 
 // SendPingMessage returns the contact that was pinged, can be used to obtain full contact from just ip
 func (network Network) SendPingMessage(contact *Contact) string {
@@ -174,9 +172,8 @@ func (network Network) SendPingMessage(contact *Contact) string {
 	return res.Status
 }
 
-
-func (network Network) createFindContactMessage(target KademliaID) requestMessage {
-	req := requestMessage{}
+func (network Network) createFindContactMessage(target KademliaID) RequestMessage {
+	req := RequestMessage{}
 	req.Sender = network.rt.me
 	req.Type = "findcontact"
 	req.Target = target
@@ -187,7 +184,7 @@ func (network Network) createFindContactMessage(target KademliaID) requestMessag
 // first contact in list posted to cc is "contact"
 func (network Network) SendFindContactMessage(contact Contact, target KademliaID) {
 	req := network.createFindContactMessage(target)
-	
+
 	res, err := sendTCPRequest(req, &contact)
 	if err != nil {
 		return
@@ -198,8 +195,8 @@ func (network Network) SendFindContactMessage(contact Contact, target KademliaID
 	network.cc <- append(s, res.Contacts...)
 }
 
-func (network *Network) createFindDataMessage(hash string) requestMessage {
-	req := requestMessage{}
+func (network *Network) createFindDataMessage(hash string) RequestMessage {
+	req := RequestMessage{}
 	req.Sender = network.rt.me
 	req.Type = "finddata"
 	req.Hash = hash
@@ -218,8 +215,8 @@ func (network *Network) SendFindDataMessage(hash string, contact Contact) string
 	return res.Data
 }
 
-func (network *Network) createSendStoreMessage(data string) requestMessage {
-	req := requestMessage{}
+func (network *Network) createSendStoreMessage(data string) RequestMessage {
+	req := RequestMessage{}
 	req.Sender = network.rt.me
 	req.Type = "storedata"
 	req.Data = data
@@ -347,7 +344,6 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 	}
 
 }
-
 
 // ta bort? få högre coverage
 // PrintClosestContacts prints contacts
