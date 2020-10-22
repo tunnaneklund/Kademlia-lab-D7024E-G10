@@ -24,7 +24,35 @@ func main() {
 			// Action är vad som händer när vi kör name kommandot
 			Action: func(c *cli.Context) error {
 				// print för att testa
-				fmt.Println("testprint från CLI")
+				fmt.Printf("this prints: %v", c.Args().Get(0))
+				return nil
+			},
+		},
+		{
+			Name:  "put",
+			Usage: "Takes a single argument, the contents of the file you are uploading, and outputs thehash of the object, if it could be uploaded successfully.",
+			// Action är vad som händer när vi kör name kommandot
+			Action: func(c *cli.Context) error {
+				data := c.Args().Get(0)
+				req := d7024e.RequestMessage{}
+				req.Type = "put"
+				req.Data = data
+				res, _ := sendTCPRequest(req, "localhost:8080")
+				fmt.Printf("status: %v\nhash: %v\n", res.Status, res.Data)
+				return nil
+			},
+		},
+		{
+			Name:  "get",
+			Usage: "Takes a hash as its only argument, and outputs the contents of the object and thenode it was retrieved from, if it could be downloaded successfully.",
+			// Action är vad som händer när vi kör name kommandot
+			Action: func(c *cli.Context) error {
+				hash := c.Args().Get(0)
+				req := d7024e.RequestMessage{}
+				req.Type = "get"
+				req.Data = hash
+				res, _ := sendTCPRequest(req, "localhost:8080")
+				fmt.Printf("status: %v\ndata: %v\n", res.Status, res.Data)
 				return nil
 			},
 		},

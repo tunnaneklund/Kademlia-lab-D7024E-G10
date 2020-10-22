@@ -143,6 +143,18 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Status = "ok"
 
 		enc.Encode(res)
+	
+
+	case "get":
+
+		data := network.getData(string(req.Data))
+
+		res.Type = "get"
+		res.Status = "ok"
+		res.Data = data
+
+
+		enc.Encode(res)
 	}
 }
 
@@ -226,7 +238,7 @@ func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan
 	req := network.createFindDataMessage(hash)
 
 	res, err := sendTCPRequest(req, &contact)
-	if err != nil {
+	if err != nil || res.Status == "fail"{
 		return 
 	}
 
