@@ -33,6 +33,6 @@ run all commands in top level folder of this project
 
 ## CLI
 
-step1: docker exec -it NAME /bin/sh
+step1: docker exec -it [NAME OF NODE] /bin/sh
 
 step2: ./cliapp
