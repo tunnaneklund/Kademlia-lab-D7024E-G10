@@ -346,7 +346,6 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 	shortlist.Append(network.findClosestLocalContacts(target))
 	updateContacts(&shortlist.contacts, &m)
 	closestNode := shortlist.contacts[0]
-	exitOnNext := false
 	notResponded := 0
 	waitTime := 2 * time.Second
 	for {
@@ -409,17 +408,13 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 		// checks if progress is being made, otherwise return K closest
 		shortlist.Sort()
 
-		if shortlist.contacts[0] == closestNode && exitOnNext {
+		if shortlist.contacts[0] == closestNode {
 			if shortlist.Len() < K {
 				return shortlist.GetContacts(shortlist.Len())
 			}
 			return shortlist.GetContacts(K)
-		} else if shortlist.contacts[0] == closestNode {
-			exitOnNext = true
-		} else {
-			exitOnNext = false
-			closestNode = shortlist.contacts[0]
 		}
+		closestNode = shortlist.contacts[0]
 	}
 }
 
