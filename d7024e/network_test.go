@@ -188,3 +188,59 @@ func TestGetDataStoreString(t *testing.T) {
 
 	fmt.Println(network.getDataStoreString())
 }
+
+func TestPrintClosestContacts(t *testing.T) {
+	n := NewNetwork("tmp")
+	c0 := NewContact(NewKademliaID("1111111200000000000000000000000000000000"), "localhost:8002")
+	n.rt.AddContact(NewContact(NewKademliaID("FFFFFFFF00000000000000000000000000000000"), "localhost:8001"))
+	n.rt.AddContact(NewContact(NewKademliaID("1111111100000000000000000000000000000000"), "localhost:8002"))
+	n.rt.AddContact(c0)
+	n.rt.AddContact(NewContact(NewKademliaID("1111111300000000000000000000000000000000"), "localhost:8002"))
+
+	n.PrintClosestContacts()
+} 
+
+func TestCreateFindContactResponse(t *testing.T) {
+	n := NewNetwork("tmp")
+	res := ResponseMessage{}
+	req := RequestMessage{}
+
+	req.Target = *NewKademliaID("FFFFFFFF00000000000000000000000000000000")
+	req.Sender = NewContact(NewKademliaID("1111111200000000000000000000000000000000"), "localhost:8002")
+
+	n.createFindContactResponse(&res, req)
+
+	out1 := res.Type
+	exp1 := "findcontact"
+
+	out2 := res.Status
+	exp2 := "ok"
+
+	out3 := len(res.Contacts)
+	exp3 := 0
+
+	if out1 != exp1 {
+		t.Errorf("expected res.Type to be %v but was %v", exp1, out1)
+	}
+
+	if out2 != exp2 {
+		t.Errorf("expected res.Status to be %v but was %v", exp2, out2)
+	}
+	
+	if out3 != exp3 {
+		t.Errorf("expected len(res.Contacts) to be %v but was %v", exp3, out3)
+	}
+	
+}
+
+func TestCreateFindDataResponse(t *testing.T) {
+	n := NewNetwork("tmp")
+	res := ResponseMessage{}
+	req := RequestMessage{}
+
+	req.Hash = "asd"	
+
+	n.createFindDataResponse(&res, req)
+
+	
+}

@@ -115,28 +115,11 @@ func (network *Network) handleConnection(conn net.Conn) {
 		network.rt.AddContact(req.Sender)
 
 	case "findcontact":
-
-		target := req.Target
-		contacts := network.findClosestLocalContacts(target)
-		res.Type = "findcontact"
-		res.Status = "ok"
-		res.Contacts = contacts
+		network.createFindContactResponse(&res, req)	
 		enc.Encode(res)
-		network.rt.AddContact(req.Sender)
-		network.PrintClosestContacts()
 
 	case "finddata":
-
-		data := network.getLocalData(req.Hash)
-
-		res.Type = "finddata"
-		if data != "" {
-			res.Data = data
-			res.Status = "ok"
-		} else {
-			res.Status = "fail"
-		}
-
+		network.createFindDataResponse(&res, req)
 		enc.Encode(res)
 
 	case "storedata":
@@ -174,6 +157,29 @@ func (network *Network) handleConnection(conn net.Conn) {
 		res.Data = network.rt.String()
 
 		enc.Encode(res)
+	}
+}
+
+func (network Network) createFindContactResponse(res *ResponseMessage, req RequestMessage)  {
+	target := req.Target
+	contacts := network.findClosestLocalContacts(target)
+	res.Type = "findcontact"
+	res.Status = "ok"
+	res.Contacts = contacts
+
+	network.rt.AddContact(req.Sender)
+	network.PrintClosestContacts()
+}
+
+func (network Network) createFindDataResponse(res *ResponseMessage, req RequestMessage)  {
+	data := network.getLocalData(req.Hash)
+
+	res.Type = "finddata"
+	if data != "" {
+		res.Data = data
+		res.Status = "ok"
+	} else {
+		res.Status = "fail"
 	}
 }
 
