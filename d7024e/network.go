@@ -135,19 +135,8 @@ func (network *Network) handleConnection(conn net.Conn) {
 
 	// for CLI
 	case "get":
-
 		data := network.getData(string(req.Data))
-
-		res.Type = "get"
-		res.Data = data.Data
-		res.SenderID = data.From
-		res.SenderIP = data.FromIP
-		if res.SenderID != "" && res.SenderIP != "" {
-			res.Status = "ok"
-		} else {
-			res.Status = "fail"
-		}
-
+		network.createGetCLIResponse(&res, req, data)
 		enc.Encode(res)
 
 	// for CLI
@@ -167,6 +156,19 @@ func (network *Network) handleConnection(conn net.Conn) {
 		enc.Encode(res)
 	}
 }
+
+func (network Network) createGetCLIResponse(res *ResponseMessage, req RequestMessage, data DataReturn)  {
+	res.Type = "get"
+	res.Data = data.Data
+	res.SenderID = data.From
+	res.SenderIP = data.FromIP
+	if res.SenderID != "" && res.SenderIP != "" {
+		res.Status = "ok"
+	} else {
+		res.Status = "fail"
+	}
+}
+
 
 func (network Network) createFindContactResponse(res *ResponseMessage, req RequestMessage)  {
 	target := req.Target

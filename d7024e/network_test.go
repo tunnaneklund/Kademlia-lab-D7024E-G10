@@ -6,7 +6,7 @@ import (
 )
 
 func TestListenBadPort(t *testing.T) {
-	fmt.Println("remove me lateer")
+	
 	n := Network{}
 
 	input := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -241,6 +241,30 @@ func TestCreateFindDataResponse(t *testing.T) {
 	req.Hash = "asd"	
 
 	n.createFindDataResponse(&res, req)
+	if res.Status != "fail" {
+		t.Errorf("expected status to be %v but was %v", "fail", res.Status)
+	}
+
+	n.dataStore["asd"] = "anton"
+	n.createFindDataResponse(&res, req)
+	
+	if res.Status != "ok" {
+		t.Errorf("expected status to be %v but was %v", "fail", res.Status)
+	}
 
 	
 }
+func TestCreateGetCLIResponse(t *testing.T) {
+	n := NewNetwork("tmp")
+	res := ResponseMessage{}
+	req := RequestMessage{}
+	data := DataReturn{ "data", "ID", "IP" }
+
+	n.createGetCLIResponse(&res, req, data)
+
+	if res.Status != "ok" {
+		t.Errorf("expected res.Status to be ok but was %v", res.Status)
+	}
+}
+
+

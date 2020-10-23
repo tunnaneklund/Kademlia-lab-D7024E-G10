@@ -1,7 +1,6 @@
 package d7024e
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -21,9 +20,6 @@ func TestNewKademliaID(t *testing.T) {
 		}
 	}
 
-
-
-	fmt.Println("wsd")
 }
 
 
