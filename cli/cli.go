@@ -29,12 +29,31 @@ func main() {
 			res, _ := sendTCPRequest(req, "localhost:8080")
 			fmt.Printf("status: %v\nhash: %v\n", res.Status, res.Data)
 		case "get":
-			hash := commands[1]
-			req := d7024e.RequestMessage{}
-			req.Type = "get"
-			req.Data = hash
-			res, _ := sendTCPRequest(req, "localhost:8080")
-			fmt.Printf("status: %v\ndata: %v\n", res.Status, res.Data)
+			// check if user inputed hash
+			if len(commands) > 1 {
+				hash := commands[1]
+				correct := true
+				if !correctHash(hash) {
+					fmt.Println("input expects only values 0-9a-fA-F")
+					correct = false
+				}
+				if len(hash) != 40 {
+					fmt.Println("expects hash of length 40")
+					correct = false
+				}
+				if correct {
+					req := d7024e.RequestMessage{}
+					req.Type = "get"
+					req.Data = hash
+					res, _ := sendTCPRequest(req, "localhost:8080")
+					fmt.Printf("status: %v\ndata: %v\n", res.Status, res.Data)
+					break
+				}
+				
+			} else {
+				fmt.Println("Command need hash input")
+				break
+			}
 		case "exit":
 			req := d7024e.RequestMessage{}
 			req.Type = "exit"
@@ -56,6 +75,16 @@ func main() {
 		}
 
 	}
+}
+
+func correctHash(str string) bool{
+	lower := strings.ToLower(str)
+	for _, c := range lower {
+		if !((c >= 97 && c <= 102) || (c >= 48 && c <= 57)) {
+			return false
+		}
+	}
+	return true
 }
 
 func sendTCPRequest(req d7024e.RequestMessage, address string) (res d7024e.ResponseMessage, err error) {
