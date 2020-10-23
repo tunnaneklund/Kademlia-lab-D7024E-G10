@@ -307,7 +307,7 @@ func (network *Network) storeData(data string) string {
 // returns when it gets data from one of the contacts
 // TODO: HANDLE IF NOONE HAS
 func (network *Network) getData(hash string) string {
-	id := NewKademliaIDFromHash(hash)
+	id := NewKademliaID(hash)
 	contacts := network.ContactLookup(*id)
 
 	res := make(chan string)
@@ -347,6 +347,8 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 	updateContacts(&shortlist.contacts, &m)
 	closestNode := shortlist.contacts[0]
 	exitOnNext := false
+	notResponded := 0
+	waitTime := 2 * time.Second
 	for {
 
 		// removes unresponsive contacts and sends rpc find to ALPHA nr of contacts
@@ -368,6 +370,7 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 				counter--
 				stat.queried = true
 				m[*c.ID] = stat
+				notResponded++
 				go network.SendFindContactMessage(c, target)
 			}
 		}
@@ -375,9 +378,15 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 		// adds new contacts from channel to shortlist, only blocks for 2 sec
 		loopVar := true
 		for loopVar {
+			if notResponded > 0 {
+				waitTime = 2 * time.Second
+			} else {
+				waitTime = 0 * time.Millisecond
+			}
 			select {
 			case cl := <-network.cc:
 				{
+					notResponded--
 					temp := m[*cl[0].ID]
 					temp.responded = true
 					m[*cl[0].ID] = temp
@@ -392,7 +401,7 @@ func (network *Network) ContactLookup(target KademliaID) []Contact {
 					updateContacts(&cl, &m)
 					shortlist.Append(cl)
 				}
-			case <-time.After(2 * time.Second):
+			case <-time.After(waitTime):
 				loopVar = false
 			}
 		}
