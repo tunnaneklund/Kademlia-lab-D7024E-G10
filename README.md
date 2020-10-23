@@ -29,4 +29,4 @@ run all commands in top level folder of this project
 
 step1: docker exec -it NAME /bin/sh
 
-step2./cliapp
+step2: ./cliapp
