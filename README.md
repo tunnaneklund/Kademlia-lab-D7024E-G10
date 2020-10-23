@@ -25,4 +25,3 @@ run all commands in top level folder of this project
 
 
 ## CLI
-To run cli run: go get github.com/urfave/cli
