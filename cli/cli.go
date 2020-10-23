@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -46,10 +45,10 @@ func main() {
 					req.Type = "get"
 					req.Data = hash
 					res, _ := sendTCPRequest(req, "localhost:8080")
-					fmt.Printf("status: %v\ndata: %v\n", res.Status, res.Data)
+					fmt.Printf("status: %v\ndata: %v\nfrom: %v %v\n", res.Status, res.Data, res.SenderID, res.SenderIP)
 					break
 				}
-				
+
 			} else {
 				fmt.Println("Command need hash input")
 				break
@@ -77,7 +76,7 @@ func main() {
 	}
 }
 
-func correctHash(str string) bool{
+func correctHash(str string) bool {
 	lower := strings.ToLower(str)
 	for _, c := range lower {
 		if !((c >= 97 && c <= 102) || (c >= 48 && c <= 57)) {

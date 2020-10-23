@@ -34,6 +34,8 @@ type ResponseMessage struct {
 	Status   string    // "ok" | "fail"
 	Data     string    // finddata
 	Contacts []Contact // findcontact
+	SenderID string
+	SenderIP string
 }
 
 // NewNetwork constructor
@@ -154,8 +156,14 @@ func (network *Network) handleConnection(conn net.Conn) {
 		data := network.getData(string(req.Data))
 
 		res.Type = "get"
-		res.Status = "ok"
-		res.Data = data
+		res.Data = data.Data
+		res.SenderID = data.From
+		res.SenderIP = data.FromIP
+		if res.SenderID != "" && res.SenderIP != "" {
+			res.Status = "ok"
+		} else {
+			res.Status = "fail"
+		}
 
 		enc.Encode(res)
 
@@ -253,7 +261,7 @@ func (network *Network) createFindDataMessage(hash string) RequestMessage {
 	return req
 }
 
-func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan string) {
+func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan DataReturn) {
 	req := network.createFindDataMessage(hash)
 
 	res, err := sendTCPRequest(req, &contact)
@@ -261,7 +269,7 @@ func (network *Network) SendFindDataMessage(hash string, contact Contact, c chan
 		return
 	}
 
-	c <- res.Data
+	c <- DataReturn{res.Data, contact.ID.String(), contact.Address}
 }
 
 func (network *Network) createSendStoreMessage(data string) RequestMessage {
@@ -302,20 +310,30 @@ func (network *Network) storeData(data string) string {
 	return id.String()
 }
 
+type DataReturn struct {
+	Data   string
+	From   string
+	FromIP string
+}
+
 // first find closest K nodes to hash
 // then probes and ask for data
 // returns when it gets data from one of the contacts
 // TODO: HANDLE IF NOONE HAS
-func (network *Network) getData(hash string) string {
+func (network *Network) getData(hash string) DataReturn {
 	id := NewKademliaID(hash)
 	contacts := network.ContactLookup(*id)
 
-	res := make(chan string)
+	res := make(chan DataReturn)
 	for _, c := range contacts {
 		go network.SendFindDataMessage(hash, c, res)
 	}
-	data := <-res
-	return data
+	select {
+	case data := <-res:
+		return data
+	case <-time.After(2 * time.Second):
+		return DataReturn{}
+	}
 
 }
 
