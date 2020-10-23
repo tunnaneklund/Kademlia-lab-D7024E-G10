@@ -3,7 +3,7 @@ Lab in the course D7024E
 
 
 
-## Run nodes(for testing)
+## Run nodes
 
 ### Locally
 Comment/uncomment code in main to run locally
@@ -12,7 +12,7 @@ go run main [port] - e.g. go run main 8080
 
 go run main [port] [known port of other node] - e.g. go run main 8081 8080
 
-### Docker
+### Docker (start script only works on windows)
 build: docker build --tag NAME .
 
 create network: docker network create mynetwork
