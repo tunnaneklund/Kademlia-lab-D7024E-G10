@@ -27,8 +27,6 @@ run all commands in top level folder of this project
 
 ## CLI
 
-###run cli:
-
 step1: docker exec -it NAME /bin/sh
 
 step2./cliapp
