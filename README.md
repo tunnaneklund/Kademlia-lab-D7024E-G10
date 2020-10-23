@@ -12,18 +12,24 @@ go run main [port] - e.g. go run main 8080
 
 go run main [port] [known port of other node] - e.g. go run main 8081 8080
 
-### Docker (start script only works on windows)
-build: docker build --tag NAME .
+### Docker
+build: docker build --tag kademlia .
 
 create network: docker network create mynetwork
 
-to start: powershell -ExecutionPolicy ByPass -File dockerrun.ps1
+to start on windows: powershell -ExecutionPolicy ByPass -File dockerrun.ps1
 
-to close: powershell -ExecutionPolicy ByPass -File dockerclose.ps1
+to close on windows: powershell -ExecutionPolicy ByPass -File dockerclose.ps1
 
-read dockerrun.ps1 to see how a single node is started. -d flag is not needed then.
+to start on linux: ./dockerrun.sh
+
+to close on linux: ./dockerclose.sh
+
+read dockerrun.ps1/sh to see how a single node is started. -d flag is not needed then.
 
 run all commands in top level folder of this project
+
+.sh scripts might require chmod
 
 ## CLI
 
